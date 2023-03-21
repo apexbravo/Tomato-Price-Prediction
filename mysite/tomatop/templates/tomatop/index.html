@@ -1,0 +1,54 @@
+{% extends 'tomatop/base.html' %}
+{% load static %}
+{% block content %}
+<header
+class="d-flex masthead"
+style="background-image: url('{% static 'img/tomatohomepage.png'%} ')"
+>
+<div class="container my-auto text-center">
+  <div class="overlay">
+
+    <h1 class="mb-1" style="color: white">Tomato Prediction App</h1>
+    <h3 class="mb-5"><em></em></h3>
+    <div class="row">
+      <div class="col">
+        <a
+          class="btn btn-primary btn-xl js-scroll-trigger me-5"
+          role="button"
+          href="{% url 'tomatop:predictPrice'%}"
+          >Forcast</a
+        ><a
+          class="btn btn-primary btn-xl js-scroll-trigger"
+          role="button"
+          href="{% url 'tomatop:predictImage'%}"
+          >Predict</a
+        >
+      </div>
+    </div>
+  </div>
+ 
+
+</div>
+</header>
+<section id="about" class="content-section bg-light">
+<div class="container text-center">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <h2>
+        Get ahead of the game with our tomato price prediction app. Never
+        overpay again!
+      </h2>
+      <p class="lead mb-5">
+        <span>Still deciding what to put here</span>
+      </p>
+      <a
+        class="btn btn-dark btn-xl js-scroll-trigger"
+        role="button"
+        href="#services"
+        >What We Offer</a
+      >
+    </div>
+  </div>
+</div>
+</section>
+{% endblock %}

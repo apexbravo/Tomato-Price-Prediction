@@ -1,0 +1,103 @@
+{% extends 'tomatop/blankLayout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+<div class="row">
+  <div class="col-md-9">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Tomato Price Prediction</h3>
+
+        </div>
+        
+            <form method="POST" action="{% url 'tomatop:predict_price' %}">
+                <div class="card-body">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="tomato_type" class="form-label">Tomato Type</label>
+                  <select class="form-select" id="tomato_type" name="tomato_type">
+                    <option value="Trinity">Trinity</option>
+                    <option value="Star9">Star9</option>
+                    <option value="Star6">Star6</option>
+                    <option value="RomaVF">RomaVF</option>
+                    <option value="Daisy">Daisy</option>
+                    <option value="Supersweet">Supersweet</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="month" class="form-label">Month</label>
+                  <select class="form-select" id="month" name="month">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="season" class="form-label">Season</label>
+                  <select class="form-select" id="season" name="season">
+                    <option value="Summer">Summer</option>
+                    <option value="Winter">Winter</option>
+                    <option value="CNG">CNG</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="quantity" class="form-label">Quantity</label>
+                  <select class="form-select" id="quantity" name="quantity">
+                    <option value="L">Large</option>
+                    <option value="M">Medium</option>
+                    <option value="S">Small</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="size" class="form-label">Size</label>
+                  <select class="form-select" id="size" name="size">
+                    <option value="Small">Small</option>
+                    <option value="Mid">Medium</option>
+                    <option value="Big">Large</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="ripeness" class="form-label">Ripeness</label>
+                  <select class="form-select" id="ripeness" name="ripeness">
+                    <option value="G">Green</option>
+                    <option value="B">Breaker</option>
+                    <option value="T">Turning</option>
+                    <option value="P">Pink</option>
+                    <option value="R">Red</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                    <label for="insects_diseases" class="form-label">Insect Diseases</label>
+                  <select class="form-select" id="insects_diseases" name="insects_diseases">
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+          
+                  </select>
+                  </div>
+
+                    </div>
+                    <div class="card-footer text-end">
+                        <button class="btn btn-primary"><i class="fa fa-save"></i>&nbsp;Submit</button>
+                    </div>
+                </div>
+
+        
+        
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+{% endblock %}

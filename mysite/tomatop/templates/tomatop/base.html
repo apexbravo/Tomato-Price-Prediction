@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load static %}
+
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+    />
+    <link rel="stylesheet" href="{% static 'css/Source%20Sans%20Pro.css' %}" />
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/Navbar-Centered-Links-icons.css' %}" />
+    <title>{% block title %} My Website {% endblock %}</title>
+  </head>
+  <body id="page-top">
+    <a class="menu-toggle rounded" href="#"><i class="fa fa-bars"></i></a>
+    <nav class="navbar navbar-light navbar-expand" id="sidebar-wrapper">
+      <div class="container">
+        <button
+          data-bs-toggle="collapse"
+          class="navbar-toggler d-none"
+          data-bs-target="#"
+        ></button>
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav sidebar-nav" id="sidebar-nav">
+            <li class="nav-item sidebar-brand">
+              <a class="nav-link active js-scroll-trigger" href="#page-top"
+                >Tomato Prediction</a
+              >
+            </li>
+            <li class="nav-item sidebar-nav-item">
+              <a class="nav-link js-scroll-trigger" href="#page-top">Home</a>
+            </li>
+            <li class="nav-item sidebar-nav-item">
+              <a class="nav-link js-scroll-trigger" href="#about">About</a>
+            </li>
+
+            <li class="nav-item sidebar-nav-item">
+              <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    {% block content %} {% endblock %}
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/stylish-portfolio.js' %}"></script>
+    {% block script %}
+    
+    {% endblock %}
+  </body>
+</html>

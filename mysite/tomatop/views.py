@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 from django.shortcuts import render
 from keras_preprocessing.image import load_img
-
+import locale
 from keras_preprocessing.image import img_to_array
 from keras.models import load_model
 import numpy as np
@@ -50,9 +50,18 @@ def predict(request):
 
         # Make the prediction
         predicted_price = model.predict(np.expand_dims(x, axis=0))[0][0]
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
+# divide the value by 100 to convert it from cents to dollars
+        predicted_price_in_dollars = float(predicted_price) / 100
+
+# format the value using the user's locale
+        formatted_price = locale.currency(predicted_price_in_dollars)
+
+# return the formatted value as a JSON response
+        return JsonResponse({'price': formatted_price})
         # Return the predicted price to the template
-        return JsonResponse({'price': float(predicted_price)})
+
     else:
         # Return the empty form to the template
         return render(request, 'index.html')
@@ -92,9 +101,11 @@ def predict_price(request):
 
         # predict the price using the loaded model
         predicted_price = lin_reg_model.predict(input_data)[0]
+        # format the predicted price as a string in the format of $x.xx
+        formatted_price = '{:,.2f}'.format(predicted_price)
 
         # display the predicted price
-        return render(request, 'predictPrice.html', {'predicted_price': predicted_price})
+        return JsonResponse({'price': formatted_price})
 
     else:
         # display the input form

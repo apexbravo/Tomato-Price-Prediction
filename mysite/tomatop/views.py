@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 import os
 import pickle
 from django.conf import settings
@@ -31,46 +33,64 @@ model = load_model(
     'C:\\Users\\apexb\\Documents\\Machine Learning\\Gunde\\Tomato Price Prediction\\mysite\\tomatop\\my_model.h5')
 
 
+from PIL import Image
+
 def predict(request):
     if request.method == 'POST':
-        # Get the uploaded image file
-        uploaded_image = request.FILES['tomato-image']
+        if 'tomato-image' in request.FILES:
+            # Get the uploaded image file
+            uploaded_image = request.FILES['tomato-image']
+        else:
+            # Capture the image from webcam
+            data_uri = request.POST.get('image_data', None)
+            if data_uri:
+                # Extract the base64 encoded image data
+                image_data = data_uri.split(',')[1]
+                # Convert the base64 encoded image data to bytes
+                image_bytes = base64.b64decode(image_data)
+                # Create a BytesIO object from the image bytes
+                uploaded_image = BytesIO(image_bytes)
+            else:
+                return JsonResponse({'error': 'No image data found.'})
 
-        # Save the uploaded image to a temporary file
-        img_file_path = os.path.join(
-            settings.BASE_DIR, 'tmp', uploaded_image.name)
-        with open(img_file_path, 'wb') as f:
-            for chunk in uploaded_image.chunks():
-                f.write(chunk)
-
-        # Load the image using Keras preprocessing
-        img = load_img(img_file_path, target_size=(120, 120))
-        x = img_to_array(img)
+        # Load and preprocess the image using PIL (Python Imaging Library)
+        img = Image.open(uploaded_image).convert('RGB')
+        img = img.resize((120, 120))
+        x = np.array(img)
         x = preprocess_input(x)
 
         # Make the prediction
-        predicted_price = model.predict(np.expand_dims(x, axis=0))[0][0]
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        predicted_class = model.predict(np.expand_dims(x, axis=0))[0][0]
 
-# divide the value by 100 to convert it from cents to dollars
-        predicted_price_in_dollars = float(predicted_price) / 100
+        # Check if the predicted class is 'tomato' with a threshold of 0.7
+        if predicted_class >= 70.0:
+            # The image is a tomato, make the price prediction
+            predicted_price = model.predict(np.expand_dims(x, axis=0))[0][0]
+            locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
-# format the value using the user's locale
-        formatted_price = locale.currency(predicted_price_in_dollars)
+            # Divide the value by 100 to convert it from cents to dollars
+            predicted_price_in_dollars = float(predicted_price) / 100
 
-# return the formatted value as a JSON response
-        return JsonResponse({'price': formatted_price})
-        # Return the predicted price to the template
+            # Format the value using the user's locale
+            formatted_price = locale.currency(predicted_price_in_dollars)
+
+            # Return the formatted value as a JSON response
+            return JsonResponse({'price': formatted_price})
+        else:
+            # The image is not a tomato, return an error message
+            return JsonResponse({'error': 'The uploaded image is not a tomato.'})
 
     else:
         # Return the empty form to the template
         return render(request, 'index.html')
 
 
+
 def preprocess_input(x):
     x = x.astype('float32')
     x /= 255.0
     return x
+
 
 
 def predict_price(request):

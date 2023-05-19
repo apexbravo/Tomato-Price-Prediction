@@ -2,24 +2,32 @@
 {% load static %}
 {% block content %}
 <div class="container">
-<div class="row">
-  <div class="col-md-9 mx-auto my-auto">
-      <form method="post" enctype="multipart/form-data" action="{% url 'tomatop:predict'%}">
-          {% csrf_token %}
-          <div class="card">
-              <div class="card-body">
-                  <div>
-                      <label for="formFileLg" class="form-label">Input Tomato Picture</label>
-                      <input class="form-control form-control-lg" id="tomato-image" name="tomato-image" type="file">
-                  </div>
-              </div>
-              <div class="card-footer text-end">
-                  <button class="btn btn-primary"><i class="fa fa-save"></i>&nbsp;Submit</button>
-              </div>
+  <div class="row">
+    <div class="col-md-9 mx-auto my-auto">
+      <form method="post" enctype="multipart/form-data" action="{% url 'tomatop:predict' %}">
+        {% csrf_token %}
+        <div class="card">
+          <div class="card-body">
+            <div>
+              <label for="formFileLg" class="form-label">Input Tomato Picture</label>
+              <input class="form-control form-control-lg" id="tomato-image" name="tomato-image" type="file">
+            </div>
+            <div class="text-center mt-3">
+              <button type="button" class="btn btn-primary" id="capture-btn"><i class="fa fa-camera"></i>&nbsp;Capture Image</button>
+            </div>
+            <div class="text-center mt-3">
+              <img id="image-preview" src="#" alt="Preview" style="max-width: 100%; max-height: 400px;">
+              
+              <h3 class="text-center my-4">Camera live Feed</h3>
+              <video id="video-preview"  autoplay style="display: none;"></video>
+              <canvas id="canvas-preview" class="text-center col-sm-8" style="display: none;"></canvas>
+            </div>
           </div>
-          {% if price %}
-              <p>The predicted price of your tomato is: USD {{ price }}</p>
-          {% endif %}
+          <div class="card-footer text-end">
+            <button class="btn btn-primary" id="upload-btn" style="display: none;"><i class="fa fa-upload"></i>&nbsp;Upload</button>
+            <button class="btn btn-primary" id="capture-submit-btn" style="display: none;"><i class="fa fa-save"></i>&nbsp;Submit</button>
+          </div>
+        </div>
       </form>
 
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -40,52 +48,186 @@
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
-          
         </div>
       </div>
+    </div>
   </div>
-</div>
 </div>
 {% endblock %}
 
-{% block script%}
+{% block script %}
 <script>
-    // Wait for the document to be ready
-    $(document).ready(function() {
-        
-        // Bind an event listener to the form submit button
-        $('form').submit(function(event) {
-            
-            // Prevent the form from submitting normally
-            event.preventDefault();
-            
-            // Create a FormData object with the form data
-            var formData = new FormData(this);
-            
-            // Send the form data to the server using AJAX
-            $.ajax({
-                type: 'POST',
-                url: '{% url "tomatop:predict" %}',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    // If the server returns successfully
-                    console.log(response);
-                    var price = response.price;
-                    $('#price-placeholder').text('The predicted price is: ' + price);
-                },
-                error: function(xhr, status, error) {
-                    // If the server returns an error
-                    console.error(xhr);
-                }
-            });
-            
-            // Show the modal
-            $('#exampleModal').modal('show');
-        });
-        
-    });
+$(document).ready(function() {
+  // Hide the image preview element initially
+  $('#image-preview').hide();
+
+  // Bind an event listener to the submit button
+  $('#capture-submit-btn').click(function() {
+    event.preventDefault();
+    // Get the image data from the image-preview element
+    var image_data = $('#image-preview').attr('src');
+
+    // Check if image data is available
+    if (image_data) {
+      // Send the image data to the backend for processing
+      $.ajax({
+        type: 'POST',
+        url: '{% url "tomatop:predict" %}',
+        data: {
+          'image_data': image_data,
+          'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        beforeSend: function() {
+          // Show loading spinner before sending the request
+          $('#price-placeholder').html('<p class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></p>');
+        },
+        success: function(response) {
+          // If the server returns successfully
+          if (response.error) {
+            // If the response contains an error, display it
+            $('#price-placeholder').text('Error: ' + response.error);
+          } else {
+            // If the response does not contain an error, display the predicted price
+            var price = response.price;
+            $('#price-placeholder').text('The predicted price is: ' + price);
+          }
+        },
+        error: function(xhr, status, error) {
+          // If the server returns an error
+          console.error(xhr);
+        },
+        complete: function() {
+          // Hide loading spinner after the request is complete
+        }
+      });
+
+      // Show the modal
+      $('#exampleModal').modal('show');
+    } else {
+      // No image data found
+      console.error('No image data found.');
+    }
+  });
+
+  // Bind an event listener to the upload button
+  $('#upload-btn').click(function() {
+    // Trigger the file input field to open the file selection dialog
+    event.preventDefault();
+    // Get the image data from the image-preview element
+    var image_data = $('#image-preview').attr('src');
+
+    // Check if image data is available
+    if (image_data) {
+      // Send the image data to the backend for processing
+      $.ajax({
+        type: 'POST',
+        url: '{% url "tomatop:predict" %}',
+        data: {
+          'image_data': image_data,
+          'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        beforeSend: function() {
+          // Show loading spinner before sending the request
+          $('#price-placeholder').html('<p class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></p>');
+        },
+        success: function(response) {
+          // If the server returns successfully
+          if (response.error) {
+            // If the response contains an error, display it
+            $('#price-placeholder').text('Error: ' + response.error);
+          } else {
+            // If the response does not contain an error, display the predicted price
+            var price = response.price;
+            $('#price-placeholder').text('The predicted price is: ' + price);
+          }
+        },
+        error: function(xhr, status, error) {
+          // If the server returns an error
+          console.error(xhr);
+        },
+        complete: function() {
+          // Hide loading spinner after the request is complete
+        }
+      });
+
+      // Show the modal
+      $('#exampleModal').modal('show');
+    } else {
+      // No image data found
+      console.error('No image data found.');
+    }
+   
+  });
+
+  // Bind an event listener to the file input field
+  $('#tomato-image').change(function() {
+    // Get the selected file from the input field
+    var file = this.files[0];
+
+    // Check if a file is selected
+    if (file) {
+      // Create a FileReader object to read the file
+      var reader = new FileReader();
+
+      // Set the image preview source when the file is loaded
+      reader.onload = function(event) {
+        $('#image-preview').attr('src', event.target.result);
+        $('#image-preview').show();
+      };
+
+      // Read the selected file as a data URL
+      reader.readAsDataURL(file);
+
+      // Show the submit button
+      $('#capture-submit-btn').show();
+    }
+  });
+
+  // Bind an event listener to the capture button
+  $('#capture-btn').click(function() {
+    // Get the video element and canvas element
+    var video = document.getElementById('video-preview');
+    var canvas = document.getElementById('canvas-preview');
+
+    // Set the canvas dimensions to match the video element
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw the current video frame onto the canvas
+    var context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Get the base64-encoded image data from the canvas
+    var image_data = canvas.toDataURL();
+
+    // Set the captured image as the source of the image-preview element
+    $('#image-preview').attr('src', image_data);
+    $('#image-preview').show();
+    $('#video-preview').hide();
+    // Show the upload button
+    $('#upload-btn').show();
+  });
+
+  // Check if the browser supports getUserMedia
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // Request access to the webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function(stream) {
+        // Display the webcam stream in the video-preview element
+        var video = document.getElementById('video-preview');
+        video.srcObject = stream;
+        video.play();
+
+        // Show the video preview element
+        video.style.display = 'block';
+      })
+      .catch(function(error) {
+        console.error('Error accessing the webcam:', error);
+      });
+  } else {
+    console.error('getUserMedia is not supported by this browser.');
+  }
+});
 </script>
 
 {% endblock %}
